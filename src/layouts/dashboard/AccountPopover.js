@@ -4,6 +4,8 @@ import homeFill from '@iconify/icons-eva/home-fill';
 import personFill from '@iconify/icons-eva/person-fill';
 import settings2Fill from '@iconify/icons-eva/settings-2-fill';
 import { Link as RouterLink } from 'react-router-dom';
+import { useMoralis } from 'react-moralis';
+
 // material
 import { alpha } from '@mui/material/styles';
 import { Button, Box, Divider, MenuItem, Typography, Avatar, IconButton } from '@mui/material';
@@ -44,6 +46,12 @@ export default function AccountPopover() {
   const handleClose = () => {
     setOpen(false);
   };
+
+  const { user } = useMoralis();
+  if (user) {
+    account.displayName = `${user.get('firstName')} ${user.get('lastName')}`;
+    account.email = user.get('email');
+  }
 
   return (
     <>

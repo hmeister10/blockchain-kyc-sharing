@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation, Navigate } from 'react-router-dom';
+import { useMoralis } from 'react-moralis';
+
 // material
 import { styled } from '@mui/material/styles';
 import { Typography } from '@mui/material';
@@ -33,6 +35,20 @@ AuthLayout.propTypes = {
 };
 
 export default function AuthLayout({ children }) {
+  const { user } = useMoralis();
+  const location = useLocation();
+
+  if (user) {
+    if (!user.get('firstName')) {
+      if (location.pathname !== '/register') {
+        // firstname isnt saved yet && user is not on register page
+        return <Navigate to="/register" state={{ from: location }} replace />;
+      }
+    } else {
+      return <Navigate to="/dashboard" state={{ from: location }} replace />;
+    }
+  }
+
   return (
     <HeaderStyle>
       <RouterLink to="/">

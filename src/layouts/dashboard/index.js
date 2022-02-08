@@ -38,9 +38,12 @@ export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const { user } = useMoralis();
   const location = useLocation();
-
+  console.log('Dashboard', { user });
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  if (user && !user.get('firstName')) {
+    return <Navigate to="/register" state={{ from: location }} replace />;
   }
 
   return (

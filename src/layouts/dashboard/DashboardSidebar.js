@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { useMoralis } from 'react-moralis';
+
 // material
 import { styled } from '@mui/material/styles';
 import { Box, Link, Button, Drawer, Typography, Avatar, Stack } from '@mui/material';
@@ -41,6 +43,10 @@ DashboardSidebar.propTypes = {
 
 export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
   const { pathname } = useLocation();
+  const { user } = useMoralis();
+  if (user) {
+    account.displayName = `${user.get('firstName')} ${user.get('lastName')}`;
+  }
 
   useEffect(() => {
     if (isOpenSidebar) {

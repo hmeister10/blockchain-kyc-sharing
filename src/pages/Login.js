@@ -41,12 +41,7 @@ const ContentStyle = styled('div')(({ theme }) => ({
 // ----------------------------------------------------------------------
 
 export default function Login() {
-  const { authenticate, user } = useMoralis();
-  const location = useLocation();
-
-  if (user) {
-    return <Navigate to="/dashboard" state={{ from: location }} replace />;
-  }
+  const { authenticate } = useMoralis();
 
   return (
     <RootStyle title="Login | Minimal-UI">

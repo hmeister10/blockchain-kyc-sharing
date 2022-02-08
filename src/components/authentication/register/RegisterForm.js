@@ -1,19 +1,37 @@
 import * as Yup from 'yup';
 import { useState } from 'react';
-import { Icon } from '@iconify/react';
 import { useFormik, Form, FormikProvider } from 'formik';
-import eyeFill from '@iconify/icons-eva/eye-fill';
-import eyeOffFill from '@iconify/icons-eva/eye-off-fill';
 import { useNavigate } from 'react-router-dom';
+import { useMoralis } from 'react-moralis';
+
 // material
-import { Stack, TextField, IconButton, InputAdornment } from '@mui/material';
+import { Stack, TextField } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import KycModal from './kycModal';
 
 // ----------------------------------------------------------------------
 
 export default function RegisterForm() {
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const { setUserData } = useMoralis();
+
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
+  const completeKYC = async () => {
+    // When KYC check passes,
+    console.log({ formik });
+
+    // Set user data
+    await setUserData({
+      firstName: formik.values.firstName,
+      lastName: formik.values.lastName,
+      email: formik.values.email
+    });
+
+    // navigate to next page
+    navigate('/dashboard', { replace: true });
+  };
 
   const RegisterSchema = Yup.object().shape({
     firstName: Yup.string()
@@ -22,19 +40,20 @@ export default function RegisterForm() {
       .required('First name required'),
     lastName: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Last name required'),
     email: Yup.string().email('Email must be a valid email address').required('Email is required'),
-    password: Yup.string().required('Password is required')
+    publicId: Yup.string().required('Public ID is required to perform e-KYC')
   });
 
   const formik = useFormik({
     initialValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: ''
+      firstName: 'Tony',
+      lastName: 'Stank',
+      email: 'edith@marvel.com',
+      publicId: '1800EDITH'
     },
     validationSchema: RegisterSchema,
     onSubmit: () => {
-      navigate('/dashboard', { replace: true });
+      // Perform KYC check here
+      handleOpen();
     }
   });
 
@@ -74,21 +93,10 @@ export default function RegisterForm() {
 
           <TextField
             fullWidth
-            autoComplete="current-password"
-            type={showPassword ? 'text' : 'password'}
-            label="Password"
-            {...getFieldProps('password')}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton edge="end" onClick={() => setShowPassword((prev) => !prev)}>
-                    <Icon icon={showPassword ? eyeFill : eyeOffFill} />
-                  </IconButton>
-                </InputAdornment>
-              )
-            }}
-            error={Boolean(touched.password && errors.password)}
-            helperText={touched.password && errors.password}
+            label="Public Id (eg. Aadhar Number)"
+            {...getFieldProps('publicId')}
+            error={Boolean(touched.publicId && errors.publicId)}
+            helperText={touched.publicId && errors.publicId}
           />
 
           <LoadingButton
@@ -102,6 +110,7 @@ export default function RegisterForm() {
           </LoadingButton>
         </Stack>
       </Form>
+      <KycModal open={open} handleClose={handleClose} handleComplete={completeKYC} />
     </FormikProvider>
   );
 }
